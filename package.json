@@ -1,0 +1,30 @@
+{
+  "name": "mesocket",
+  "version": "1.0.0",
+  "description": "A tcp socket test tool implemented by Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luobin100/mesocket.git"
+  },
+  "keywords": [
+    "socket",
+    "tcp",
+    "node",
+    "server",
+    "client"
+  ],
+  "author": "luobin100",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luobin100/mesocket/issues"
+  },
+  "homepage": "https://github.com/luobin100/mesocket#readme",
+  "dependencies": {
+    "crc": "^3.8.0",
+    "luoutil": "^1.0.4"
+  }
+}
