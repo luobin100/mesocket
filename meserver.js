@@ -10,7 +10,7 @@ var net = require('net');
 var readline = require('readline');
 const SocketDealer = require("./SocketDealer");
 
-/*---- parameters check ----*/
+/*---- arguments check ----*/
 if (process.argv.length < 3) {
     console.log(`\r\n Usage: ${process.argv[0].split("/").slice(-1)} ${process.argv[1].split("/").slice(-1)} <port> <mode>(mode is optional) \r\n`);
     return 1;
