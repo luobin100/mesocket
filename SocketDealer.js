@@ -36,8 +36,11 @@ class SocketDealer {
             } else if (mode === "hex") {
                 this._mode = "hex";
                 console.log("模式设置成功，已切换为："+this._mode);
+            } else if (mode === "both") {
+                this._mode = "both";
+                console.log("模式设置成功，已切换为："+this._mode);
             } else {
-                console.log("请输入以下两种模式： ascii 或 hex；"+" 当前模式："+this._mode);
+                console.log("请输入以下三种模式： ascii 、 hex 或 both；"+" 当前模式："+this._mode);
             }
 
             return true;
@@ -66,6 +69,13 @@ class SocketDealer {
             socket.write(sendData);
             const asciiStr = sendData.toString("ascii");
             console.log("Send: "+asciiStr);
+        }  else if (this._mode === "both") {
+            let sendData;
+            sendData = Buffer.from(line, "ascii");
+            socket.write(sendData);
+            const asciiStr = sendData.toString("ascii");
+            console.log("Send (ascii): "+asciiStr);
+            console.log("Send (hex): "+sendData.toString("hex"));
         } else {
             throw new Error("该模式不存在：" + this._mode);
         }
@@ -76,6 +86,9 @@ class SocketDealer {
             console.log('Received: ' + data.toString("hex"));
         } else if (this._mode === "ascii") {
             console.log('Received: ' + data.toString("ascii"));
+        } else if (this._mode === "both") {
+            console.log('Received (ascii):' + data.toString("ascii"));
+            console.log('Received (hex): ' + data.toString("hex"));
         } else {
             throw new Error("该模式不存在：" + this._mode);
         }
