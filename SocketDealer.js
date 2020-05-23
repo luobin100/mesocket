@@ -63,18 +63,10 @@ class SocketDealer {
         } else if (this._mode === "ascii") {
 
             // 添加转义字符的功能，让用户可在终端命令行输入回车换行 \r\n
-            // 示例：aaa\r\nbbb
-            // 如果 \ 有转义的话， hex 的结果应该为： 6161610d0a626262
-            // 如果都当作普通字符的话是：6161615c725c6e626262
-            // \r\n 的普通字符 5c725c6e   全部替换成  0d0a 就可以了
-            // 即： (\r) 5c72 -> 0d  (\n) 5c6e -> 0a
-            // 先把用户输入结果全部当成普通字符转成hex buffer，再把buffer 转成string，在string里替换。
-            // 注意：只转义 "\r"、"\n" 这两个，其它的没有必要，比如 \t tab 是可以直接在命令行输入的。
+            line = line.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
 
             let sendData;
             sendData = Buffer.from(line, "ascii");
-            const escapedStr = sendData.toString("hex").replace(/5c72/g,"0d").replace(/5c6e/g,"0a");
-            sendData = Buffer.from(escapedStr, "hex");
             socket.write(sendData);
             const asciiStr = sendData.toString("ascii");
             console.log("Send: "+asciiStr);
