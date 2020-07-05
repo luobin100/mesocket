@@ -28,3 +28,4 @@
   * set socket list  或 set socket 显示当前所有的连接  
   * set socket all 向所有连接 发送  
   * set socket 127.0.0.1:55701 只向一个单独的socket连接发送  
+  * set socket show 查看当前的发送对象的设置
