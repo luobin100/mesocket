@@ -55,7 +55,7 @@ var server = net.createServer(function(socket) {
     });
 
     socket.on("data", data => {
-        socketDealer.handleData(data)
+        socketDealer.handleData(socket, data)
     })
 });
 

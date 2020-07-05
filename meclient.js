@@ -59,7 +59,7 @@ socket.connect(PORT_NUMBER, SERVER_ADDR, function() {
 });
 
 socket.on('data', function(data) {
-    socketDealer.handleData(data);
+    socketDealer.handleData(undefined, data);
 });
 
 socket.on('close', function() {
