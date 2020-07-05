@@ -14,13 +14,17 @@
 `node meclient 127.0.0.1 1881`  
 
 详细使用说明：  
- * tcp socket 测试工具 分为服务端（meserver.js）及客户端（meclient.js）
- * 分为两种模式 hex 和 ascii，默认为 hex（16进制）
- * 启动程序时或使用中都可以切换模式。
- * 启动时： node meserver 1881 ascii （启动tcp服务器时设置模式为 ascii）
- * 使用中： set hex 或 set ascii 进行模式切换。
- * 如果不是 set + 空格 开头则说明当前操作为发送，不是设置操作。
- * 发送操作 也分两种： 直接发送 及 附上crc校验码后发送。  
- * 附上crc发送示例：F60300000001 autocrc
- * 处于ascii模式时，具有转义字符功能，输入 "\r\n" 或 "\r"、"\n" 可转义为换行（因为命令行无法输入回车换行）。
- * 示例：输入 aaa\r\nbbb 将被视为 aaa + 换行回车 + bbb。
+* tcp socket 测试工具 分为服务端（meserver.js）及客户端（meclient.js）
+* 分为两种模式 hex 和 ascii，默认为 hex（16进制）
+* 启动程序时或使用中都可以切换模式。
+  * 启动时： node meserver 1881 ascii （启动tcp服务器时设置模式为 ascii）
+  * 使用中： set hex 或 set ascii 进行模式切换。
+* 如果不是 set + 空格 开头则说明当前操作为发送，不是设置操作。
+* 发送操作 也分两种： 直接发送 及 附上crc校验码后发送。  
+  * 附上crc发送示例：F60300000001 autocrc
+* 处于ascii模式时，具有转义字符功能，输入 "\r\n" 或 "\r"、"\n" 可转义为换行（因为命令行无法输入回车换行）。
+  * 输入 aaa\r\nbbb 将被视为 aaa + 换行回车 + bbb。
+* 服务端 meserver 在使用中状态时，可以指定只向一个单独的socket连接发送 或者 向所有连接 发送。  
+  * set socket list  或 set socket 显示当前所有的连接  
+  * set socket all 向所有连接 发送  
+  * set socket 127.0.0.1:55701 只向一个单独的socket连接发送  

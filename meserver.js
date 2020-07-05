@@ -43,13 +43,13 @@ const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool);
 
 var server = net.createServer(function(socket) {
 
-    console.log('Client in! ip:' + socket.remoteAddress);
+    console.log('Client in! ' + socket.remoteAddress + ':' + socket.remotePort);
     socket.write('Echo server\r\n');
     socketPool.push(socket); // 加入socket连接池，以方便外面的代码使用
 
     // 断开连接时，从socket连接池中删除
     socket.on('close', function() {
-        console.log('Client closed! ip:' + socket.remoteAddress);
+        console.log('Client closed! ' + socket.remoteAddress + ':' + socket.remotePort);
         const idx = socketPool.indexOf(socket);
         socketPool.splice(idx, 1);
     });
