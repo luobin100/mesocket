@@ -243,6 +243,20 @@ class SocketDealer {
             this.handleLine(socket, line);
         }
     }
+
+    // 根据是否是全发还是单发，过滤接受到的数据。
+    // 也就是单独发，也单独收那个设置的socket连接。
+    handleServerData (socket, data) {
+        if (this._socketValue === "all") {
+            this.handleData(socket, data)
+        } else {
+            if (socket.remoteAddress + ":" + socket.remotePort === this._socketValue) {
+                this.handleData(socket, data)
+            } else {
+                // do nothing 过滤掉其他socket发来的数据
+            }
+        }
+    }
 }
 
 
