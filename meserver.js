@@ -9,15 +9,17 @@
 var net = require('net');
 var readline = require('readline');
 const SocketDealer = require("./SocketDealer");
+const {NO_FILTER} = require("./Const")
 
 /*---- arguments check ----*/
 if (process.argv.length < 3) {
-    console.log(`\r\n Usage: ${process.argv[0].split("/").slice(-1)} ${process.argv[1].split("/").slice(-1)} <port> <mode>(mode is optional) \r\n`);
+    console.log(`\r\n Usage: ${process.argv[0].split("/").slice(-1)} ${process.argv[1].split("/").slice(-1)} <port> <mode>(option) <filter>(option) \r\n`);
     return 1;
 }
 
 let PORT_NUMBER = process.argv[2];
 let INIT_MODE = process.argv[3];
+let INIT_FILTER = process.argv[4];
 
 if (!PORT_NUMBER) {
     console.log("第二参数端口地址未填写！")
@@ -37,9 +39,14 @@ if (INIT_MODE !== "hex" && INIT_MODE !== "ascii") {
     return 1;
 }
 
+// filter 默认设置为 No_Filter
+if (!INIT_FILTER) {
+    INIT_FILTER = NO_FILTER
+}
+
 /*---- main ----*/
 const socketPool = [];
-const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool);
+const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool, undefined, INIT_FILTER);
 
 var server = net.createServer(function(socket) {
     socket.setKeepAlive(true, 10000) // 设置 tcp keepalive，防止客户端意外断开连接。
