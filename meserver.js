@@ -42,7 +42,7 @@ const socketPool = [];
 const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool);
 
 var server = net.createServer(function(socket) {
-
+    socket.setKeepAlive(true, 30000) // 设置 tcp keepalive，防止客户端意外断开连接。
     console.log('Client in! ' + socket.remoteAddress + ':' + socket.remotePort);
     socket.write('Echo server\r\n');
     socketPool.push(socket); // 加入socket连接池，以方便外面的代码使用

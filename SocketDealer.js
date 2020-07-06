@@ -94,53 +94,6 @@ class SocketDealer {
         }
     }
 
-    isValidIP (str) {
-        const arr = str.split(".")
-        if (arr.length !== 4) {
-            return false
-        }
-        const isAllValidIPNum = arr.some(function (numStr) {
-            const num = parseInt(numStr)
-            // 如果不是数字，直接返回不是有效ip
-            if (isNaN(num)) {
-                return false
-            }
-            const isInRange = num >= 0 && num <= 255
-            if (!isInRange) {
-                return false
-            }
-            return true
-        })
-        if (!isAllValidIPNum) {
-            return false
-        }
-
-        return true
-    }
-
-    isValidPort (str) {
-        const port = parseInt(str)
-        // 如果不是数字，直接返回不是有效端口号
-        if (isNaN(port)) {
-            return false
-        }
-        const isInRange = port >= 1 && port <= 65535
-        if (!isInRange) {
-            return false
-        }
-        return true
-    }
-
-    isValidIPPort (str) {
-        const arr = str.split(":")
-        if (arr.length !== 2) {
-            return false
-        }
-        const ip = arr[0]
-        const port = arr[1]
-        return this.isValidIP(ip) && this.isValidPort(port)
-    }
-
     chkSetSocket (line) {
         let action;
 
@@ -167,7 +120,7 @@ class SocketDealer {
                 } else if (setValue === "all") { // 设为向所有连接发送
                     this._socketValue = setValue
                     console.log("发送对象设置成功，socket对象为：" + this._socketValue);
-                } else if (this.isValidIPPort(setValue)) { // 输入的是有效的ip:端口号
+                } else if (util.isValidIPPort(setValue)) { // 输入的是有效的ip:端口号
                     this._socketValue = setValue
                     console.log("发送对象设置成功，socket对象为：" + this._socketValue);
                 } else {
