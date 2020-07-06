@@ -34,3 +34,5 @@
   * set filter (无参数) 查询过滤设置 默认为 "NO_Filter" 不过滤
   * set filter aaa 过滤以 aaa 开头的数据（数据用 ascii 解码后进行比对），这里的“过滤”指的是“只显示”的意思， 即只显示以 aaa 开头的数据
   * set filter aaa|bbb 多个过滤条件，过滤以 aaa 或 bbb 开头的数据
+* 过滤器 filter 可在启动时通过参数设置
+  * 注意，如果时多个过滤条件 比如 aaa|bbb ，因为 | 为shell 的 pipe，所以需要用转义字符，示例：node meserver 1122 ascii aaa\|bbb
