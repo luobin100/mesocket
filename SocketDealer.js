@@ -27,17 +27,22 @@ const COLOR = {
 }
 
 const RESET_COLOR = '\x1B[0m' // \x1B[0m 表示重置终端颜色，使其在此之后不再继续成为所选颜色；
+const ALL = 'all'
+const NO_FILTER = 'No_Filter'
+const LIST = 'list'
+const SHOW = 'show'
 
 class SocketDealer {
     // socket     客户端需要用到，连接的socket
     // mode       发送接受数据模式 hex：16进制； ascii：ascii字符。 默认16进制。
     // socketPool 服务器端需要用到，所有连接的socket数组 （optional）
     // socketValue 服务器端需要用到，all 还是 单独的socket（ip+端口号） （optional）
-    constructor (socket, mode, socketPool, socketValue) {
+    constructor (socket, mode, socketPool, socketValue, filterValue) {
         this._socket = socket;
         this._mode = mode;
         this._socketPool = socketPool;
-        this._socketValue = "all"; // 发送对象socket 初始值设为 all，因为 client 不会管这个属性，也没事。
+        this._socketValue = ALL; // 发送对象socket 初始值设为 all，因为 client 不会管这个属性，也没事。
+        this._filterValue = NO_FILTER // server端 filter 初始值设为 No_Filter,即“不过滤”的意思。  
     }
 
     chkSetMode (line) {
@@ -113,11 +118,11 @@ class SocketDealer {
             const setProp = inputs[1]
             if (setProp === "socket") {
                 const setValue = inputs[2]
-                if (!setValue || setValue === "show") { // 没有写socket值 或 show
+                if (!setValue || setValue === SHOW) { // 没有写socket值 或 show
                     console.log("查询发送对象设置，当前socket对象为：" + this._socketValue);
-                } else if (setValue === "list") { // 列出所有socket
+                } else if (setValue === LIST) { // 列出所有socket
                     this._socketPool.forEach(s => console.log(s.remoteAddress + ":" + s.remotePort))
-                } else if (setValue === "all") { // 设为向所有连接发送
+                } else if (setValue === ALL) { // 设为向所有连接发送
                     this._socketValue = setValue
                     console.log("发送对象设置成功，socket对象为：" + this._socketValue);
                 } else if (util.isValidIPPort(setValue)) { // 输入的是有效的ip:端口号
@@ -125,6 +130,38 @@ class SocketDealer {
                     console.log("发送对象设置成功，socket对象为：" + this._socketValue);
                 } else {
                     console.log("设置发送对象请输入以下4种值：list、 all、show 或 有效的ip+端口号；"+" 当前发送对象：" + this._socketValue);
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    chkSetFilter (line) {
+        let action;
+
+        // 输入示例：
+        // set socket list  或 set socket 显示当前所有的连接
+        // set socket all
+        // set socket 127.0.0.1:55701
+
+        const inputs = line.split(" ");
+        if (inputs[0] === "set") {
+            action = "set"
+        } else {
+            action = "send"
+        }
+
+        if (action === "set") {
+            const setProp = inputs[1]
+            if (setProp === "filter") {
+                const setValue = inputs[2]
+                if (!setValue) { // 没有写filter值 
+                    console.log("查询过滤设置，当前过滤设置为：" + this._filterValue);
+                } else {
+                    this._filterValue = setValue
+                    console.log("设置过滤成功，当前过滤设置为：" + this._filterValue);
                 }
             }
             return true;
@@ -184,10 +221,11 @@ class SocketDealer {
     handleServerLine (line) {
         const isSetMode = this.chkSetMode(line);
         const isSetSocket = this.chkSetSocket(line);
-        if (isSetMode || isSetSocket) {
+        const isSetFilter = this.chkSetFilter(line);
+        if (isSetMode || isSetSocket || isSetFilter) {
             return;
         }
-        if (this._socketValue === "all") {
+        if (this._socketValue === ALL) {
             this._socketPool.forEach((socket) => {
                 this.handleLine(socket, line);
             })
@@ -200,7 +238,18 @@ class SocketDealer {
     // 根据是否是全发还是单发，过滤接受到的数据。
     // 也就是单独发，也单独收那个设置的socket连接。
     handleServerData (socket, data) {
-        if (this._socketValue === "all") {
+        // set filter 过滤
+        if (this._filterValue !== NO_FILTER) {
+            // 检查过滤条件 比如 aaa|bbb 将只显示 以aaa、bbb开头的数据
+            const filters = this._filterValue.split("|")
+            const isHit = filters.some(v => data.toString("ascii").indexOf(v) === 0)
+            if (!isHit) {
+                return;
+            }
+        }
+
+        // set socket 过滤
+        if (this._socketValue === ALL) {
             this.handleData(socket, data)
         } else {
             if (socket.remoteAddress + ":" + socket.remotePort === this._socketValue) {

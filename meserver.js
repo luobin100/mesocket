@@ -42,21 +42,39 @@ const socketPool = [];
 const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool);
 
 var server = net.createServer(function(socket) {
-    socket.setKeepAlive(true, 30000) // 设置 tcp keepalive，防止客户端意外断开连接。
+    socket.setKeepAlive(true, 10000) // 设置 tcp keepalive，防止客户端意外断开连接。
     console.log('Client in! ' + socket.remoteAddress + ':' + socket.remotePort);
     socket.write('Echo server\r\n');
     socketPool.push(socket); // 加入socket连接池，以方便外面的代码使用
 
     // 断开连接时，从socket连接池中删除
-    socket.on('close', function() {
-        console.log('Client closed! ' + socket.remoteAddress + ':' + socket.remotePort);
+    socket.on('close', function(hadError) {
+        console.log(`Client closed${hadError ? ' with error' : ''}! ` + socket.remoteAddress + ':' + socket.remotePort);
+        removeSocket();
+    });
+
+    function removeSocket() {
         const idx = socketPool.indexOf(socket);
         socketPool.splice(idx, 1);
-    });
+    }
 
     socket.on("data", data => {
         socketDealer.handleServerData(socket, data)
     })
+
+    // handle keepalive error 客户端意外断开
+    socket.on("error", function(err) {
+        console.log('socket err! ' + err);
+        removeSocket();
+    })
+
+    // 是否启用心跳包
+    // socket.setTimeout(10000);
+    // socket.on("timeout", function() {
+    //     console.log('socket timeout!')
+    //     socket.end();
+    //     removeSocket();
+    // })
 });
 
 server.listen(PORT_NUMBER, '0.0.0.0');

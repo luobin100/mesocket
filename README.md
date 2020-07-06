@@ -30,5 +30,7 @@
   * set socket 127.0.0.1:55701 只向一个单独的socket连接发送  
   * set socket show 查看当前的发送对象的设置
   * 如果设置了只向一个连接发送，这个连接之外发送来的数据也会被过滤掉不显示出来
-  
-  TODO:做一个过滤数据的功能，不是 usr.cn# 或 admin 开头的不显示，方便我调试用。
+* 服务端 meserver 在使用中状态时，可以设置过滤器
+  * set filter (无参数) 查询过滤设置 默认为 "NO_Filter" 不过滤
+  * set filter aaa 过滤以 aaa 开头的数据（数据用 ascii 解码后进行比对），这里的“过滤”指的是“只显示”的意思， 即只显示以 aaa 开头的数据
+  * set filter aaa|bbb 多个过滤条件，过滤以 aaa 或 bbb 开头的数据
