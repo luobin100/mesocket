@@ -1,6 +1,6 @@
 const util = require("luoutil");
 const myCRC = require("./myCRC");
-const {ALL, NO_FILTER, SHOW, LIST, COLOR, RESET_COLOR} = require("./Const")
+const {ALL, NO_FILTER, SHOW, LIST, COLOR, RESET_COLOR, VALID_MODES, ASCII, HEX, SEND, RECV} = require("./Const")
 
 class SocketDealer {
     // socket     客户端需要用到，连接的socket
@@ -9,7 +9,7 @@ class SocketDealer {
     // socketValue 服务器端需要用到，all 还是 单独的socket（ip+端口号） （optional）
     constructor (socket, mode, socketPool, socketValue, filterValue) {
         this._socket = socket;
-        this._mode = mode;
+        this._mode = mode; // ATTENTION: mode 的命名不加 Value，故意这样设计的。因为以后有可能全部改为这种的形式。
         this._socketPool = socketPool;
         this._socketValue = ALL; // 发送对象socket 初始值设为 all，因为 client 不会管这个属性，也没事。
         this._filterValue = filterValue // server端 filter 初始值设为 No_Filter,即“不过滤”的意思。  
@@ -33,35 +33,17 @@ class SocketDealer {
 
         // set 设置模式
         if (action === "set") {
-            const mode = inputs[1];
-            if (mode === "ascii") {
-                this._mode = "ascii";
-                console.log("模式设置成功，已切换为：" + this._mode);
-            } else if (mode === "hex") {
-                this._mode = "hex";
-                console.log("模式设置成功，已切换为：" + this._mode);
-            }
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-
-    chkSetModeValid (line) {
-        let action;
-        const inputs = line.split(" ");
-        if (inputs[0] === "set") {
-            action = "set"
-        } else {
-            action = "send"
-        }
-
-        if (action === "set") {
-            const mode = inputs[1];
-            if (mode !== "hex" && mode !== "ascii") {
-                console.log("请输入以下两种模式： ascii 或 hex；"+" 当前模式：" + this._mode);
+            const setProp = inputs[1]
+            if (setProp === "mode") {
+                const setValue = inputs[2]
+                if (!setValue) { // 没有写mode值 set mode 表示查询当前设置值
+                    console.log("查询模式设置，当前模式设置为：" + this._mode);
+                } else if (VALID_MODES.indexOf(setValue) >= 0) {
+                    this._mode = setValue
+                    console.log("模式设置成功，已切换为：" + this._mode);
+                } else {
+                    console.log("请输入有效的模式值！当前模式设置为：" + this._mode);
+                }
             }
             return true;
         } else {
@@ -89,7 +71,7 @@ class SocketDealer {
             if (setProp === "socket") {
                 const setValue = inputs[2]
                 if (!setValue || setValue === SHOW) { // 没有写socket值 或 show
-                    console.log("查询发送对象设置，当前socket对象为：" + this._socketValue);
+                    console.log("查询发送对象设置，当前socket对象为：" + this._target);
                 } else if (setValue === LIST) { // 列出所有socket
                     this._socketPool.forEach(s => console.log(s.remoteAddress + ":" + s.remotePort))
                 } else if (setValue === ALL) { // 设为向所有连接发送
@@ -127,7 +109,7 @@ class SocketDealer {
             const setProp = inputs[1]
             if (setProp === "filter") {
                 const setValue = inputs[2]
-                if (!setValue) { // 没有写filter值 
+                if (!setValue) { // 没有写filter值 set filter 表示查询当前设置值
                     console.log("查询过滤设置，当前过滤设置为：" + this._filterValue);
                 } else {
                     this._filterValue = setValue
@@ -143,27 +125,27 @@ class SocketDealer {
     handleLine (socket=this._socket, line) {
         const prefixStr = `${COLOR.grey}Send to ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
         // 发送模式
-        if (this._mode === "hex") {
+        if (this._mode === HEX || this._mode === SEND + HEX + RECV + ASCII) {
             let sendData;
             // 自动生成crc option
             var [command, option] = line.split(" ");
             if(option === "autocrc"){
-                sendData = myCRC.bufAppendCRC(Buffer.from(command, "hex"));
+                sendData = myCRC.bufAppendCRC(Buffer.from(command, HEX));
             } else {
-                sendData = Buffer.from(line, "hex");
+                sendData = Buffer.from(line, HEX);
             }
             socket.write(sendData);
-            console.log(prefixStr + COLOR.blue + sendData.toString("hex") + RESET_COLOR);
+            console.log(prefixStr + COLOR.blue + sendData.toString(HEX) + RESET_COLOR);
 
-        } else if (this._mode === "ascii") {
+        } else if (this._mode === ASCII || this._mode === SEND + ASCII + RECV + HEX) {
 
             // 添加转义字符的功能，让用户可在终端命令行输入回车换行 \r\n
             line = line.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
 
             let sendData;
-            sendData = Buffer.from(line, "ascii");
+            sendData = Buffer.from(line, ASCII);
             socket.write(sendData);
-            const asciiStr = sendData.toString("ascii");
+            const asciiStr = sendData.toString(ASCII);
             console.log(prefixStr + COLOR.blue + asciiStr + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
@@ -172,18 +154,17 @@ class SocketDealer {
     }
     handleData (socket=this._socket, data) {
         const prefixStr = `${COLOR.grey}Received from ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
-        if (this._mode === "hex") {
-            console.log(prefixStr + COLOR.green + data.toString("hex") + RESET_COLOR);
-        } else if (this._mode === "ascii") {
-            console.log(prefixStr + COLOR.green + data.toString("ascii") + RESET_COLOR);
+        if (this._mode === HEX || this._mode === SEND + ASCII + RECV + HEX) {
+            console.log(prefixStr + COLOR.green + data.toString(HEX) + RESET_COLOR);
+        } else if (this._mode === ASCII || this._mode === SEND + HEX + RECV + ASCII) {
+            console.log(prefixStr + COLOR.green + data.toString(ASCII) + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
         }
     }
     handleClientLine (line) {
         const isSetMode = this.chkSetMode(line);
-        const isSetModeValid = this.chkSetModeValid(line);
-        if (isSetMode || isSetModeValid) {
+        if (isSetMode) {
             return;
         }
         this.handleLine(undefined, line);
@@ -212,7 +193,7 @@ class SocketDealer {
         if (this._filterValue !== NO_FILTER) {
             // 检查过滤条件 比如 aaa|bbb 将只显示 以aaa、bbb开头的数据
             const filters = this._filterValue.split("|")
-            const isHit = filters.some(v => data.toString("ascii").indexOf(v) === 0)
+            const isHit = filters.some(v => data.toString(ASCII).indexOf(v) === 0)
             if (!isHit) {
                 return;
             }

@@ -18,7 +18,8 @@
 * 分为两种模式 hex 和 ascii，默认为 hex（16进制）
 * 启动程序时或使用中都可以切换模式。
   * 启动时： `node meserver 1881 ascii` （启动tcp服务器时设置模式为 ascii）
-  * 使用中： `set hex` 或 `set ascii` 进行模式切换。
+  * 使用中： `set mode hex` 或 `set mode ascii` 进行模式切换。
+  * 模式总共有四种 `hex`、 `ascii`、 `ShexRascii`、 `SasciiRhex`。 分别表示发送接受都十六进制、都ascii、发送（Send）十六进制接受（Recv）ascii、发送ascii接受十六进制。
 * 如果不是 set + 空格 开头则说明当前操作为发送，不是设置操作。
 * 发送操作 也分两种： 直接发送 及 附上crc校验码后发送。  
   * 附上crc发送示例：`F60300000001 autocrc`

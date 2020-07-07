@@ -30,11 +30,29 @@ const NO_FILTER = 'No_Filter'
 const LIST = 'list'
 const SHOW = 'show'
 
+// 发送 hex 接受 ascii 这样的模式，生成所有有效的模式列表
+const VALID_MODES = []
+const SEND = 'S';
+const RECV = 'R';
+const HEX = 'hex';
+const ASCII = 'ascii'
+// 规定只有4种合法值，hex 代表 发送接受都十六进制， ascii 同理。  ShexRascii 代表十六进制发送 ascii 接受，反之也一样。
+VALID_MODES.push(HEX)
+VALID_MODES.push(ASCII)
+VALID_MODES.push(SEND + HEX + RECV + ASCII)
+VALID_MODES.push(SEND + ASCII + RECV + HEX)
+
+
 module.exports = {
     COLOR,
     RESET_COLOR,
     ALL,
     NO_FILTER,
     LIST,
-    SHOW
+    SHOW,
+    VALID_MODES,
+    HEX,
+    ASCII,
+    SEND,
+    RECV
 }
