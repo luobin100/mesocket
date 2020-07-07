@@ -13,7 +13,7 @@
 `node meserver 1881`  
 `node meclient 127.0.0.1 1881`  
 
-详细使用说明：  
+详细使用说明（Detail）：  
 * tcp socket 测试工具 分为服务端（meserver.js）及客户端（meclient.js）
 * 分为两种模式 hex 和 ascii，默认为 hex（16进制）
 * 启动程序时或使用中都可以切换模式。
