@@ -13,13 +13,14 @@ const {NO_FILTER} = require("./Const")
 
 /*---- arguments check ----*/
 if (process.argv.length < 3) {
-    console.log(`\r\n Usage: ${process.argv[0].split("/").slice(-1)} ${process.argv[1].split("/").slice(-1)} <port> <mode>(option) <filter>(option) \r\n`);
+    console.log(`\r\n Usage: ${process.argv[0].split("/").slice(-1)} ${process.argv[1].split("/").slice(-1)} <port> <mode>(option) <filter>(option) <timestamp>(option) \r\n`);
     return 1;
 }
 
 let PORT_NUMBER = process.argv[2];
 let INIT_MODE = process.argv[3];
 let INIT_FILTER = process.argv[4];
+let INIT_TIMESTAMP = process.argv[5];
 
 if (!PORT_NUMBER) {
     console.log("第一参数端口地址未填写！")
@@ -50,9 +51,19 @@ if (!INIT_FILTER) {
 // References: https://stackoverflow.com/questions/4351521/how-do-i-pass-command-line-arguments-to-a-node-js-program
 INIT_FILTER = INIT_FILTER.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
 
+// 显示时间 默认设置为 不显示 off
+if (!INIT_TIMESTAMP) {
+    INIT_TIMESTAMP = "off"
+}
+if (INIT_TIMESTAMP  !== "on" && INIT_TIMESTAMP !== "off") {
+    console.log("第四参数显示时间 必须为 on 或 off")
+    return 1;
+}
+
+
 /*---- main ----*/
 const socketPool = [];
-const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool, undefined, INIT_FILTER);
+const socketDealer = new SocketDealer(undefined, INIT_MODE, socketPool, undefined, INIT_FILTER, INIT_TIMESTAMP);
 
 var server = net.createServer(function(socket) {
     socket.setKeepAlive(true, 10000) // 设置 tcp keepalive，防止客户端意外断开连接。

@@ -19,6 +19,7 @@ if (process.argv.length < 4) {
 const SERVER_ADDR = process.argv[2];
 let PORT_NUMBER = process.argv[3];
 let INIT_MODE = process.argv[4];
+let INIT_TIMESTAMP = process.argv[5];
 
 if (!SERVER_ADDR) {
     console.log("第一参数服务器地址未填写！")
@@ -42,9 +43,18 @@ if (INIT_MODE !== "hex" && INIT_MODE !== "utf8") {
     return 1;
 }
 
+// 显示时间 默认设置为 不显示 off
+if (!INIT_TIMESTAMP) {
+    INIT_TIMESTAMP = "off"
+}
+if (INIT_TIMESTAMP  !== "on" && INIT_TIMESTAMP !== "off") {
+    console.log("第四参数显示时间 必须为 on 或 off")
+    return 1;
+}
+
 /*---- main ----*/
 var socket = new net.Socket();
-const socketDealer = new SocketDealer(socket, INIT_MODE);
+const socketDealer = new SocketDealer(socket, INIT_MODE, undefined, undefined, undefined, INIT_TIMESTAMP);
 
 socket.connect(PORT_NUMBER, SERVER_ADDR, function() {
     console.log('Connected');

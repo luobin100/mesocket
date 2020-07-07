@@ -25,6 +25,6 @@
   "homepage": "https://github.com/luobin100/mesocket#readme",
   "dependencies": {
     "crc": "^3.8.0",
-    "luoutil": "^1.0.10"
+    "luoutil": "^1.0.11"
   }
 }

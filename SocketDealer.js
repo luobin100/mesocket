@@ -7,22 +7,23 @@ class SocketDealer {
     // mode       发送接受数据模式 hex：16进制； utf8：utf8字符串。 默认16进制。
     // socketPool 服务器端需要用到，所有连接的socket数组 （optional）
     // socketValue 服务器端需要用到，all 还是 单独的socket（ip+端口号） （optional）
-    constructor (socket, mode, socketPool, socketValue, filterValue) {
+    // filterValue 服务器端需要用到，过滤器，指定哪些字符串开头的数据才显示 （optional）
+    // timestamp  是否显示时间 on 或 off（optional）
+    constructor (socket, mode, socketPool, socketValue, filterValue, timestamp) {
         this._socket = socket;
         this._mode = mode; // ATTENTION: mode 的命名不加 Value，故意这样设计的。因为以后有可能全部改为这种的形式。
         this._socketPool = socketPool;
         this._socketValue = ALL; // 发送对象socket 初始值设为 all，因为 client 不会管这个属性，也没事。
-        this._filterValue = filterValue // server端 filter 初始值设为 No_Filter,即“不过滤”的意思。  
+        this._filterValue = filterValue // server端 filter 初始值设为 No_Filter,即“不过滤”的意思。 
+        this._timestamp = timestamp 
     }
 
     chkSetMode (line) {
         let action;
 
         // 输入示例：
-        // set utf8
-        // set hex
-        // f60300000001 autocrc
-        // f60300000001914d
+        // set mode utf8
+        // set mode hex
 
         const inputs = line.split(" ");
         if (inputs[0] === "set") {
@@ -94,9 +95,8 @@ class SocketDealer {
         let action;
 
         // 输入示例：
-        // set socket list  或 set socket 显示当前所有的连接
-        // set socket all
-        // set socket 127.0.0.1:55701
+        // set filter aaa       只显示以aaa开头的数据
+        // set filter aaa|bbb   只显示以aaa 或 bbb 开头的数据  
 
         const inputs = line.split(" ");
         if (inputs[0] === "set") {
@@ -113,10 +113,8 @@ class SocketDealer {
                     console.log("查询过滤设置，当前过滤设置为：" + this._filterValue);
                 } else {
                     this._filterValue = setValue
-
                     // 添加转义字符的功能，让用户可以输入回车换行 \r\n 的过滤字符串
                     this._filterValue = this._filterValue.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
-
                     console.log("设置过滤成功，当前过滤设置为：" + this._filterValue);
                 }
             }
@@ -126,8 +124,45 @@ class SocketDealer {
         }
     }
 
+    chkSetTimestamp (line) {
+        let action;
+
+        // 输入示例：
+        // set timestamp on  开启显示时间
+        // set timestamp off 关闭显示时间
+
+        const inputs = line.split(" ");
+        if (inputs[0] === "set") {
+            action = "set"
+        } else {
+            action = "send"
+        }
+
+        if (action === "set") {
+            const setProp = inputs[1]
+            if (setProp === "timestamp") {
+                const setValue = inputs[2]
+                if (!setValue) { // 没有写值 表示查询当前设置值
+                    console.log("查询显示时间设置，当前显示时间设置为：" + this._timestamp);
+                } else if (setValue === "on" || setValue === "off") { // 输入的是有效值
+                    this._timestamp = setValue
+                    console.log("显示时间设置成功，显示时间设置为：" + this._timestamp);
+                } else {
+                    console.log("设置显示时间请输入以下2种值：on 或 off；"+" 当前显示时间设置为：" + this._timestamp);
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     handleLine (socket=this._socket, line) {
-        const prefixStr = `${COLOR.grey}Send to ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
+        let prefixStr = `${COLOR.grey}Send to ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
+        if (this._timestamp === "on") {
+            const timeStr = `${COLOR.grey}[${util.timeFormat(new Date(), "yyyy-MM-dd hh:mm:ss.S")}]# ${RESET_COLOR}`
+            prefixStr = timeStr + prefixStr
+        }
         // 发送模式
         if (this._mode === HEX || this._mode === SEND + HEX + RECV + UTF8) {
             let sendData;
@@ -157,7 +192,11 @@ class SocketDealer {
 
     }
     handleData (socket=this._socket, data) {
-        const prefixStr = `${COLOR.grey}Received from ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
+        let prefixStr = `${COLOR.grey}Received from ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
+        if (this._timestamp === "on") {
+            const timeStr = `${COLOR.grey}[${util.timeFormat(new Date(), "yyyy-MM-dd hh:mm:ss.S")}]# ${RESET_COLOR}`
+            prefixStr = timeStr + prefixStr
+        }
         if (this._mode === HEX || this._mode === SEND + UTF8 + RECV + HEX) {
             console.log(prefixStr + COLOR.green + data.toString("hex") + RESET_COLOR);
         } else if (this._mode === UTF8 || this._mode === SEND + HEX + RECV + UTF8) {
@@ -168,7 +207,8 @@ class SocketDealer {
     }
     handleClientLine (line) {
         const isSetMode = this.chkSetMode(line);
-        if (isSetMode) {
+        const isSetTimestamp = this.chkSetTimestamp(line);
+        if (isSetMode || isSetTimestamp) {
             return;
         }
         this.handleLine(undefined, line);
@@ -177,7 +217,8 @@ class SocketDealer {
         const isSetMode = this.chkSetMode(line);
         const isSetSocket = this.chkSetSocket(line);
         const isSetFilter = this.chkSetFilter(line);
-        if (isSetMode || isSetSocket || isSetFilter) {
+        const isSetTimestamp = this.chkSetTimestamp(line);
+        if (isSetMode || isSetSocket || isSetFilter || isSetTimestamp) {
             return;
         }
         if (this._socketValue === ALL) {
