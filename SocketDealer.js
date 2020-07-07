@@ -113,6 +113,10 @@ class SocketDealer {
                     console.log("查询过滤设置，当前过滤设置为：" + this._filterValue);
                 } else {
                     this._filterValue = setValue
+
+                    // 添加转义字符的功能，让用户可以输入回车换行 \r\n 的过滤字符串
+                    this._filterValue = this._filterValue.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
+
                     console.log("设置过滤成功，当前过滤设置为：" + this._filterValue);
                 }
             }
