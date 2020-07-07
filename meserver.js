@@ -1,7 +1,7 @@
 /***
  * tcp socket 测试工具 服务端
- * 分为两种模式 hex 和 ascii，
- * 使用 set hex 或 set ascii 进行模式切换。
+ * 分为两种模式 hex 和 utf8
+ * 使用 set hex 或 set utf8 进行模式切换。
  * 如果不是 set + 空格 开头则说明当前操作为发送，不是设置操作。
  * 发送操作 也分两种： 直接发送 及 附上crc校验码后发送。
  * 附上crc发送示例：F60300000001 autocrc
@@ -10,7 +10,6 @@ var net = require('net');
 var readline = require('readline');
 const SocketDealer = require("./SocketDealer");
 const {NO_FILTER} = require("./Const")
-const util = require("luoutil");
 
 /*---- arguments check ----*/
 if (process.argv.length < 3) {
@@ -23,11 +22,11 @@ let INIT_MODE = process.argv[3];
 let INIT_FILTER = process.argv[4];
 
 if (!PORT_NUMBER) {
-    console.log("第二参数端口地址未填写！")
+    console.log("第一参数端口地址未填写！")
     return 1;
 }
 if (isNaN(PORT_NUMBER)) {
-    console.log("第二参数端口地址必须为数字！")
+    console.log("第一参数端口地址必须为数字！")
     return 1;
 }
 PORT_NUMBER = parseInt(PORT_NUMBER);
@@ -35,8 +34,8 @@ PORT_NUMBER = parseInt(PORT_NUMBER);
 if (!INIT_MODE) {
     INIT_MODE = "hex"
 }
-if (INIT_MODE !== "hex" && INIT_MODE !== "ascii") {
-    console.log("第三参数模式 必须为 hex 或 ascii！")
+if (INIT_MODE !== "hex" && INIT_MODE !== "utf8") {
+    console.log("第二参数模式 必须为 hex 或 utf8")
     return 1;
 }
 

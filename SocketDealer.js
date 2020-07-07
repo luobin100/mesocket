@@ -1,10 +1,10 @@
 const util = require("luoutil");
 const myCRC = require("./myCRC");
-const {ALL, NO_FILTER, SHOW, LIST, COLOR, RESET_COLOR, VALID_MODES, ASCII, HEX, SEND, RECV} = require("./Const")
+const {ALL, NO_FILTER, SHOW, LIST, COLOR, RESET_COLOR, VALID_MODES, UTF8, HEX, SEND, RECV} = require("./Const")
 
 class SocketDealer {
     // socket     客户端需要用到，连接的socket
-    // mode       发送接受数据模式 hex：16进制； ascii：ascii字符。 默认16进制。
+    // mode       发送接受数据模式 hex：16进制； utf8：utf8字符串。 默认16进制。
     // socketPool 服务器端需要用到，所有连接的socket数组 （optional）
     // socketValue 服务器端需要用到，all 还是 单独的socket（ip+端口号） （optional）
     constructor (socket, mode, socketPool, socketValue, filterValue) {
@@ -19,7 +19,7 @@ class SocketDealer {
         let action;
 
         // 输入示例：
-        // set ascii
+        // set utf8
         // set hex
         // f60300000001 autocrc
         // f60300000001914d
@@ -129,7 +129,7 @@ class SocketDealer {
     handleLine (socket=this._socket, line) {
         const prefixStr = `${COLOR.grey}Send to ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
         // 发送模式
-        if (this._mode === HEX || this._mode === SEND + HEX + RECV + ASCII) {
+        if (this._mode === HEX || this._mode === SEND + HEX + RECV + UTF8) {
             let sendData;
             // 自动生成crc option
             var [command, option] = line.split(" ");
@@ -141,7 +141,7 @@ class SocketDealer {
             socket.write(sendData);
             console.log(prefixStr + COLOR.blue + sendData.toString("hex") + RESET_COLOR);
 
-        } else if (this._mode === ASCII || this._mode === SEND + ASCII + RECV + HEX) {
+        } else if (this._mode === UTF8 || this._mode === SEND + UTF8 + RECV + HEX) {
 
             // 添加转义字符的功能，让用户可在终端命令行输入回车换行 \r\n
             line = line.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
@@ -149,8 +149,8 @@ class SocketDealer {
             let sendData;
             sendData = Buffer.from(line, "utf8");
             socket.write(sendData);
-            const asciiStr = sendData.toString("utf8");
-            console.log(prefixStr + COLOR.blue + asciiStr + RESET_COLOR);
+            const str = sendData.toString("utf8");
+            console.log(prefixStr + COLOR.blue + str + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
         }
@@ -158,9 +158,9 @@ class SocketDealer {
     }
     handleData (socket=this._socket, data) {
         const prefixStr = `${COLOR.grey}Received from ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
-        if (this._mode === HEX || this._mode === SEND + ASCII + RECV + HEX) {
+        if (this._mode === HEX || this._mode === SEND + UTF8 + RECV + HEX) {
             console.log(prefixStr + COLOR.green + data.toString("hex") + RESET_COLOR);
-        } else if (this._mode === ASCII || this._mode === SEND + HEX + RECV + ASCII) {
+        } else if (this._mode === UTF8 || this._mode === SEND + HEX + RECV + UTF8) {
             console.log(prefixStr + COLOR.green + data.toString("utf8") + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
@@ -197,7 +197,7 @@ class SocketDealer {
         if (this._filterValue !== NO_FILTER) {
             // 检查过滤条件 比如 aaa|bbb 将只显示 以aaa、bbb开头的数据
             const filters = this._filterValue.split("|")
-            const isHit = filters.some(v => data.toString("ascii").indexOf(v) === 0)
+            const isHit = filters.some(v => data.toString("utf8").indexOf(v) === 0)
             if (!isHit) {
                 return;
             }

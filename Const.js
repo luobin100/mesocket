@@ -35,12 +35,12 @@ const VALID_MODES = []
 const SEND = 'S';
 const RECV = 'R';
 const HEX = 'hex';
-const ASCII = 'ascii'
+const UTF8 = 'utf8'
 // 规定只有4种合法值，hex 代表 发送接受都十六进制， ascii 同理。  ShexRascii 代表十六进制发送 ascii 接受，反之也一样。
 VALID_MODES.push(HEX)
-VALID_MODES.push(ASCII)
-VALID_MODES.push(SEND + HEX + RECV + ASCII)
-VALID_MODES.push(SEND + ASCII + RECV + HEX)
+VALID_MODES.push(UTF8)
+VALID_MODES.push(SEND + HEX + RECV + UTF8)
+VALID_MODES.push(SEND + UTF8 + RECV + HEX)
 
 
 module.exports = {
@@ -52,7 +52,7 @@ module.exports = {
     SHOW,
     VALID_MODES,
     HEX,
-    ASCII,
+    UTF8,
     SEND,
     RECV
 }
