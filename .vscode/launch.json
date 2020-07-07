@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/meserver.js",
-            "args": ["1122", "ascii"]
+            "args": ["1122", "ascii", "\\r\\n+"]
 
         }
     ]

@@ -132,10 +132,10 @@ class SocketDealer {
             if(option === "autocrc"){
                 sendData = myCRC.bufAppendCRC(Buffer.from(command, HEX));
             } else {
-                sendData = Buffer.from(line, HEX);
+                sendData = Buffer.from(line, "hex");
             }
             socket.write(sendData);
-            console.log(prefixStr + COLOR.blue + sendData.toString(HEX) + RESET_COLOR);
+            console.log(prefixStr + COLOR.blue + sendData.toString("hex") + RESET_COLOR);
 
         } else if (this._mode === ASCII || this._mode === SEND + ASCII + RECV + HEX) {
 
@@ -143,9 +143,9 @@ class SocketDealer {
             line = line.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
 
             let sendData;
-            sendData = Buffer.from(line, ASCII);
+            sendData = Buffer.from(line, "utf8");
             socket.write(sendData);
-            const asciiStr = sendData.toString(ASCII);
+            const asciiStr = sendData.toString("utf8");
             console.log(prefixStr + COLOR.blue + asciiStr + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
@@ -155,9 +155,9 @@ class SocketDealer {
     handleData (socket=this._socket, data) {
         const prefixStr = `${COLOR.grey}Received from ${socket.remoteAddress}:${socket.remotePort}>${RESET_COLOR}`
         if (this._mode === HEX || this._mode === SEND + ASCII + RECV + HEX) {
-            console.log(prefixStr + COLOR.green + data.toString(HEX) + RESET_COLOR);
+            console.log(prefixStr + COLOR.green + data.toString("hex") + RESET_COLOR);
         } else if (this._mode === ASCII || this._mode === SEND + HEX + RECV + ASCII) {
-            console.log(prefixStr + COLOR.green + data.toString(ASCII) + RESET_COLOR);
+            console.log(prefixStr + COLOR.green + data.toString("utf8") + RESET_COLOR);
         } else {
             throw new Error("该模式不存在：" + this._mode);
         }
@@ -193,7 +193,7 @@ class SocketDealer {
         if (this._filterValue !== NO_FILTER) {
             // 检查过滤条件 比如 aaa|bbb 将只显示 以aaa、bbb开头的数据
             const filters = this._filterValue.split("|")
-            const isHit = filters.some(v => data.toString(ASCII).indexOf(v) === 0)
+            const isHit = filters.some(v => data.toString("ascii").indexOf(v) === 0)
             if (!isHit) {
                 return;
             }

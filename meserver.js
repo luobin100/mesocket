@@ -10,6 +10,7 @@ var net = require('net');
 var readline = require('readline');
 const SocketDealer = require("./SocketDealer");
 const {NO_FILTER} = require("./Const")
+const util = require("luoutil");
 
 /*---- arguments check ----*/
 if (process.argv.length < 3) {
@@ -43,6 +44,12 @@ if (INIT_MODE !== "hex" && INIT_MODE !== "ascii") {
 if (!INIT_FILTER) {
     INIT_FILTER = NO_FILTER
 }
+
+// 添加转义字符的功能，让输入参数可支持回车换行 \r\n
+// 因为bash 默认的IFS (Internal Field Separator) 是 space、 tab、 和 换行，这样就没法输入回车为参数了
+// 也可以使用 ANSI C Like String: $'\r\n'
+// References: https://stackoverflow.com/questions/4351521/how-do-i-pass-command-line-arguments-to-a-node-js-program
+INIT_FILTER = INIT_FILTER.replace(/\\r/g, "\r").replace(/\\n/g, "\n");
 
 /*---- main ----*/
 const socketPool = [];
