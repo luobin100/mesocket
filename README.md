@@ -38,10 +38,12 @@
   * 使用中状态使用 set filter xxx 设置过滤，如果想设置回车换行，这样设置：`set filter \r\n+` 以一个回车换行加上加号开头的数据才会显示。
 * 过滤器 filter 可在启动时通过参数设置
   * 注意，如果filter 参数为多个过滤条件 比如 aaa|bbb ，因为 | 为shell 的 pipe（管道），所以需要使用转义字符 "\\"。 示例：`node meserver 1122 utf8 aaa\|bbb`
-  * 如果过滤字符串需设置为 换行回车 "\r\n" （十六进制为: 0D0A），程序会自动将 "\r"、 "\n" 进行转义，要这样输入：`node meserver 1122 utf8 aaa\|\\r\\nbbb`。这样设计的原因是，默认IFS（内部分隔符）会将换行符也作为一种，正常的话无法输入，倒是可以用 ANSI C Like Strings实现 `$'\r\n'`。
+  * 如果过滤字符串需设置为 换行回车 "\r\n" （十六进制为: 0D0A），程序会自动将 "\r"、 "\n" 进行转义，要这样输入：`node meserver 1122 utf8 aaa\|\\r\\nbbb`。这样设计的原因是，默认IFS（内部分隔符）会将换行符也作为一种，正常的话无法输入，倒是可以用 ANSI C Like Strings实现 `$'\r\n'`。
 * 可以是设置是否显示时间，精确到毫秒
   * 示例：`[2020-07-08 05:04:00.271]# Received from 127.0.0.1:53825>sdfas`
   * 启动时通过参数设置
     * 服务端：`node meserver 1122 utf8 aaa on` (aaa 为 filter过滤器，需加一个过滤器参数，因为参数是按第几个这样来顺序来的)
     * 客户端：`node meclient localhost 1122 utf8 on`
-  * 使用中状态通过 set 命令来设置。开启显示时间： `set timestamp on`、 关闭显示时间：`set timestamp off`
+  * 使用中状态通过 set 命令来设置。
+    * 开启显示时间： `set timestamp on`
+    * 关闭显示时间：`set timestamp off`
