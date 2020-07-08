@@ -42,7 +42,7 @@
 * 可以是设置是否显示时间，精确到毫秒
   * 示例：`[2020-07-08 05:04:00.271]# Received from 127.0.0.1:53825>sdfas`
   * 启动时通过参数设置
-    * 服务端：`node meserver 1122 utf8 aaa on` (aaa 为 filter过滤器，需加一个过滤器参数，因为参数是按第几个这样来顺序来的)
+    * 服务端：`node meserver 1122 utf8 No_Filter on` (No_Filter 为 filter过滤器参数，表示不过滤。需加一个过滤器参数，因为参数是按第几个这样来顺序来的)
     * 客户端：`node meclient localhost 1122 utf8 on`
   * 使用中状态通过 set 命令来设置。
     * 开启显示时间： `set timestamp on`
