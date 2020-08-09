@@ -207,8 +207,9 @@ class SocketDealer {
     }
     handleClientLine (line) {
         const isSetMode = this.chkSetMode(line);
+        const isSetFilter = this.chkSetFilter(line);
         const isSetTimestamp = this.chkSetTimestamp(line);
-        if (isSetMode || isSetTimestamp) {
+        if (isSetMode || isSetFilter || isSetTimestamp) {
             return;
         }
         this.handleLine(undefined, line);
@@ -254,6 +255,20 @@ class SocketDealer {
                 // do nothing 过滤掉其他socket发来的数据
             }
         }
+    }
+
+    handleClientData (socket, data) {
+        // set filter 过滤
+        if (this._filterValue !== NO_FILTER) {
+            // 检查过滤条件 比如 aaa|bbb 将只显示 以aaa、bbb开头的数据
+            const filters = this._filterValue.split("|")
+            const isHit = filters.some(v => data.toString("utf8").indexOf(v) === 0)
+            if (!isHit) {
+                return; // 直接返回，不显示数据（即 过滤）
+            }
+        }
+        // 上面的情况不符合 就可以打印
+        this.handleData(socket, data);
     }
 }
 

@@ -26,7 +26,7 @@ const COLOR = {
 
 const RESET_COLOR = '\x1B[0m' // \x1B[0m 表示重置终端颜色，使其在此之后不再继续成为所选颜色；
 const ALL = 'all'
-const NO_FILTER = 'No_Filter'
+const NO_FILTER = 'No_Filter' // 设置过滤为 不过滤的意思
 const LIST = 'list'
 const SHOW = 'show'
 
