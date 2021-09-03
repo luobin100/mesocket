@@ -48,3 +48,7 @@
   * 使用中状态通过 set 命令来设置。
     * 开启显示时间： `set timestamp on`
     * 关闭显示时间：`set timestamp off`
+* 服务端 meserver 和 客户端 meclient 在使用中状态时，可以设置自动发送数据
+  * `set autosend hello 1000`。 hello 为要发送的utf8文本或16进制字符串（根据当前的 set mode 模式来判断），1000 为发送的时间间隔（单位为毫秒）。
+  * `set autosend No_AutoSend`。No_AutoSend 表示停止自动发送。
+  * `set autosend` 后面什么都不加，表示查询当前的 autosend 设置值。
